@@ -64,16 +64,16 @@ namespace BaldaGame.Controllers
          PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop));
       }
 
-      public void SetPerson()
-      {
-         if (PersonIcon != Icon.Empty && PersonName != "")
-         {
-            IsSettedUp = true;
-         }
-         else
-         {
-            IsSettedUp = false;
-         }
-      }
-   }
+        public void SetPerson()
+        {
+            if (PersonIcon != Icon.Empty && PersonName != "")
+            {
+                IsSettedUp = true;
+            }
+            else
+            {
+                IsSettedUp = false;
+            }
+        }
+    }
 }
