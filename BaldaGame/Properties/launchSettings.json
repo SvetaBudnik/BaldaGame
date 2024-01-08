@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "BaldaGame (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "BaldaGame (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
