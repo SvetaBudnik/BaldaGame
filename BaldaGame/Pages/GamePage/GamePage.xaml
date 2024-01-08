@@ -10,14 +10,16 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <Page.Resources>
-        <DataTemplate x:Key="FoundedWordsListItemTemplate" x:DataType="x:String">
-            <TextBlock 
+        <DataTemplate
+            x:Key="FoundedWordsListItemTemplate"
+            x:DataType="x:String">
+            <TextBlock
                 Text="{x:Bind ToString()}"
                 FontSize="20"
-                Margin="0 5 0 5"/>
+                Margin="0 5 0 5" />
         </DataTemplate>
     </Page.Resources>
-    
+
     <Grid
         Padding="10">
         <Grid.ColumnDefinitions>
@@ -43,15 +45,15 @@
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
                 Margin="0 40 0 40">
-                <TextBlock 
-                    Text="Username1"
+                <TextBlock
+                    Text="{x:Bind mainPlayerController.PersonName, Mode=OneWay}"
                     FontSize="28"
                     HorizontalAlignment="Center"
-                    Margin="0 0 0 5"/>
+                    Margin="0 0 0 5" />
                 <Border
                     CornerRadius="10">
                     <Image
-                        Source="/Assets/Icons/Players/art-woolf.jpg"
+                        Source="{x:Bind mainPlayerController.PersonIcon.AssetPath, Mode=OneWay}"
                         Width="200"
                         Height="200" />
                 </Border>
@@ -69,16 +71,17 @@
                     Text="Найденные слова:"
                     FontSize="20"
                     HorizontalAlignment="Center"
-                    Margin="0 0 0 10"/>
+                    Margin="0 0 0 10" />
 
-                <ListView 
+                <ListView
                     Grid.Row="1"
                     x:Name="MainPersonListView"
                     ItemTemplate="{StaticResource FoundedWordsListItemTemplate}"
+                    ItemsSource="{x:Bind gameDataController.MainPlayerWords, Mode=OneWay}"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch"
                     BorderThickness="1"
-                    BorderBrush="{ThemeResource SystemControlForegroundBaseMediumBrush}"/>
+                    BorderBrush="{ThemeResource SystemControlForegroundBaseMediumBrush}" />
             </Grid>
         </Grid>
 
@@ -101,10 +104,10 @@
                 TextAlignment="Center">
                 <Run
                     Text="Времени на ход осталось:" />
-                <Run 
-                    Text="123"/>
-                <Run 
-                    Text="с."/>
+                <Run
+                    Text="{x:Bind gameDataController.TimerValue, Mode=OneWay}" />
+                <Run
+                    Text="с." />
             </TextBlock>
 
             <Viewbox
@@ -146,15 +149,46 @@
                 </Grid>
             </Viewbox>
 
-            <TextBlock
-                FontSize="24"
-                TextAlignment="Center"
-                Grid.Row="2">
-                <Run
-                    Text="Ход игрока" />
-                <Run 
-                    Text="Username 1"/>
-            </TextBlock>
+            <StackPanel
+                Grid.Row="2"
+                HorizontalAlignment="Center">
+                <StackPanel
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Center">
+                    <TextBlock
+                        FontSize="24"
+                        TextAlignment="Center">
+                    <Run
+                            Text="Ход игрока" />
+                    <Run
+                            Text="{x:Bind gameDataController.CurrentPersonName, Mode=OneWay}" />
+                    </TextBlock>
+                    <ProgressRing
+                        IsActive="True"
+                        Width="24"
+                        Height="24" 
+                        Margin="10 0 0 0"/>
+                </StackPanel>
+
+                <TextBlock
+                    Text="Ожидаем подтверждения слова от другого игрока..."
+                    x:Name="TextBlockAwaitingForConfirm"
+                    x:FieldModifier="public"
+                    FontSize="20"
+                    Visibility="Collapsed"/>
+                <TextBlock
+                    Text="Выберите ячейку, куда нужно вставить новую букву"
+                    x:Name="TextBlockAwaitNewCell"
+                    x:FieldModifier="public"
+                    FontSize="20"
+                    Visibility="Collapsed"/>
+                <TextBlock
+                    Text="Выделите слово, включая новую букву"
+                    x:Name="TextBlockAwaitNewWord"
+                    x:FieldModifier="public"
+                    FontSize="20"
+                    Visibility="Collapsed"/>
+            </StackPanel>
 
             <Grid
                 Grid.Row="3"
@@ -162,21 +196,37 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition />
                     <ColumnDefinition />
+                    <ColumnDefinition />
                 </Grid.ColumnDefinitions>
 
                 <Button
+                    Grid.Column="0"
                     HorizontalAlignment="Left"
-                    Content="Закончить игру" 
-                    FontSize="15"/>
+                    Content="Закончить игру"
+                    FontSize="15" 
+                    Click="CancelGameButtonClick"/>
                 <Button
-                    HorizontalAlignment="Right"
                     Grid.Column="1"
-                    Content="Пропустить ход" 
-                    FontSize="15"/>
+                    x:Name="ReverseStepButton"
+                    x:FieldModifier="Public"
+                    IsEnabled="False"
+                    HorizontalAlignment="Center"
+                    Content="Отменить ход"
+                    FontSize="15" 
+                    Click="ReverseStepButton_Click"/>
+                <Button
+                    Grid.Column="2"
+                    x:Name="SkipStepButton"
+                    x:FieldModifier="Public"
+                    IsEnabled="False"
+                    HorizontalAlignment="Right"
+                    Content="Пропустить ход"
+                    FontSize="15"
+                    Click="SkipStepButton_Click"/>
             </Grid>
-            
+
         </Grid>
-        
+
         <!--Информация о подключенном игроке-->
         <Grid
             Grid.Column="2">
@@ -192,14 +242,14 @@
                 VerticalAlignment="Center"
                 Margin="0 40 0 40">
                 <TextBlock
-                    Text="Username2"
+                    Text="{x:Bind secondPlayerController.PersonName, Mode=OneWay}"
                     FontSize="28"
                     HorizontalAlignment="Center"
                     Margin="0 0 0 5" />
                 <Border
                     CornerRadius="10">
                     <Image
-                        Source="/Assets/Icons/Players/art-sloth.jpg"
+                        Source="{x:Bind secondPlayerController.PersonIcon.AssetPath, Mode=OneWay}"
                         Width="200"
                         Height="200" />
                 </Border>
@@ -223,6 +273,7 @@
                     Grid.Row="1"
                     x:Name="SecondPersonListView"
                     ItemTemplate="{StaticResource FoundedWordsListItemTemplate}"
+                    ItemsSource="{x:Bind gameDataController.SecondPlayerWords, Mode=OneWay}"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch"
                     BorderThickness="1"

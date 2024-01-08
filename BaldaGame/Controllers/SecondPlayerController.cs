@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 
 namespace BaldaGame.Controllers
 {
-   public class SecondPlayerController
+   public class SecondPlayerController : INotifyPropertyChanged
    {
       public Person Person { get; private set; } = Person.Empty;
 

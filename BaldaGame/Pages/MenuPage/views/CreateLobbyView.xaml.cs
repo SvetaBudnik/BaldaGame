@@ -18,10 +18,16 @@ namespace BaldaGame.Pages.MenuPage.views
       public CreateLobbyView()
       {
          InitializeComponent();
+         var gameController = App.Instance.GameController;
+         gameController.CreateLobbyView = this;
+         gameController.StartClientServer();
       }
 
       private void BackButtonClick(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
       {
+         var gameController = App.Instance.GameController;
+         gameController.StopClientServer();
+
          var controller = MenuPageNavigationController.Instance;
          controller.NavigateBack();
       }

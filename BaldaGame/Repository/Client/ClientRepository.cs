@@ -40,7 +40,7 @@ namespace BaldaGame.Repository.Client
          var endpoint = await GetIPEndPointAsync();
          if (endpoint is null) return false;
 
-         Debug.WriteLine("Cliend found new server");
+         Debug.WriteLine($"Cliend found new server: {endpoint.Address}:{endpoint.Port}");
 
          try
          {
@@ -57,13 +57,14 @@ namespace BaldaGame.Repository.Client
             return false;
          }
 
-         //_ = ListenMessages();
-         new Thread(async () => await ListenMessages()).Start();
+         _ = ListenMessages();
 
          var msg = new ServerMessage()
          {
             Id = ServerMessageIds.PlayerConnected
          };
+
+         await Task.Delay(100);
          NotifyListeners(msg);
 
          return true;
@@ -72,7 +73,7 @@ namespace BaldaGame.Repository.Client
       public void SendMessage(ClientMessage message)
       {
          var encoded = message.Encode();
-         Writer?.Write(encoded);
+         Writer?.WriteLine(encoded);
          Writer?.Flush();
       }
 
@@ -84,8 +85,11 @@ namespace BaldaGame.Repository.Client
             {
                if (Reader is null) break;
 
+               var bufSize = client.Available;
+
                var encoded = await Reader.ReadLineAsync();
-               if (encoded is null) continue;
+
+               if (encoded == null) break;
                var message = ServerMessage.Decode(encoded);
                NotifyListeners(message);
             }
@@ -103,7 +107,7 @@ namespace BaldaGame.Repository.Client
 
       public void NotifyListeners(ServerMessage message)
       {
-         Debug.WriteLine($"Клиент получил новое сообщение: {message.Id}");
+         Debug.WriteLine($"Клиент получил новое сообщение: {message.Id}, {message.Data}");
 
          switch (message.Id)
          {
@@ -131,7 +135,7 @@ namespace BaldaGame.Repository.Client
          var playerInfo = Server.PlayerInfoMessage.TryFromMessage(message);
          if (playerInfo != null)
          {
-            var playerEvent = new ClientGotPlayerInfo(playerInfo.PersonName, playerInfo.iconTag);
+            var playerEvent = new ClientGotPlayerInfo(playerInfo.PersonName, playerInfo.IconTag);
             Notify?.Invoke(playerEvent);
          }
          else Debug.WriteLine($"ClientRepository.OnPlayerInfo: Что-то пошло не так, сообщение не расшифровалось.\n Id:{message.Id}, Data: {message.Data}");
@@ -155,15 +159,23 @@ namespace BaldaGame.Repository.Client
 
       void OnMainWordWasChoosen(ServerMessage message)
       {
-         var playerMove = Server.MainWordWasChoosenMessage.TryFromMessage(message);
-         if (playerMove != null)
+         try
          {
-            var playerEvent = new ClientServerChoosedMainWord(
-               playerMove.ChoosenWord
-            );
-            Notify?.Invoke(playerEvent);
+            var playerMove = Server.MainWordWasChoosenMessage.TryFromMessage(message);
+            if (playerMove != null)
+            {
+               var playerEvent = new ClientServerChoosedMainWord(
+                  playerMove.ChoosenWord
+               );
+               Notify?.Invoke(playerEvent);
+            }
+            else Debug.WriteLine($"ClientRepository.OnMainWordWasChoosen: Что-то пошло не так, сообщение не расшифровалось.\n Id:{message.Id}, Data: {message.Data}");
          }
-         else Debug.WriteLine($"ClientRepository.OnMainWordWasChoosen: Что-то пошло не так, сообщение не расшифровалось.\n Id:{message.Id}, Data: {message.Data}");
+         catch (Exception e)
+         {
+            Debug.WriteLine($"ClientRepository.OnMainWordWasChoosen: Что-то пошло не так, сообщение не расшифровалось.\n Id:{message.Id}, Data: {message.Data}");
+            Debug.WriteLine(e.Message);
+         }
       }
 
       void OnPlayerSkipMove(ServerMessage message)
@@ -238,6 +250,11 @@ namespace BaldaGame.Repository.Client
       public void Stop()
       {
          Debug.WriteLine("Client was stopped");
+         var message = new ServerMessage()
+         {
+            Id = ServerMessageIds.PlayerDisconnected
+         };
+         NotifyListeners(message);
 
          _isClientRunning = false;
          _isUdpScanRunning = false;

@@ -62,7 +62,7 @@ namespace BaldaGame.Repository.Server
       public static ServerMessageIds Id { get => ServerMessageIds.PlayerInfo; }
 
       public string PersonName { get; set; } = personName;
-      public string iconTag { get; set; } = iconTag;
+      public string IconTag { get; set; } = iconTag;
 
       public static PlayerInfoMessage? TryFromMessage(ServerMessage message)
       {
@@ -82,11 +82,11 @@ namespace BaldaGame.Repository.Server
       }
    }
 
-   public class MainWordWasChoosenMessage(string word)
+   public class MainWordWasChoosenMessage(string choosenWord)
    {
       public static ServerMessageIds Id { get => ServerMessageIds.MainWordWasChoosen; }
       
-      public string ChoosenWord { get; set; } = word;
+      public string ChoosenWord { get; set; } = choosenWord;
 
       public static MainWordWasChoosenMessage? TryFromMessage(ServerMessage message)
       {
@@ -106,11 +106,11 @@ namespace BaldaGame.Repository.Server
       }
    }
 
-   public class PlayerMakeMoveMessage(string word, string newChar, int charX, int charY)
+   public class PlayerMakeMoveMessage(string choosenWord, string newChar, int charX, int charY)
    {
       public static ServerMessageIds Id { get => ServerMessageIds.PlayerMakeMove; }
       
-      public string ChoosenWord { get; set; } = word;
+      public string ChoosenWord { get; set; } = choosenWord;
       public string NewChar { get; set; } = newChar;
       public int CharX { get; set; } = charX;
       public int CharY { get; set; } = charY;

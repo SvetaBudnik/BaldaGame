@@ -81,7 +81,7 @@ namespace BaldaGame.Repository.Client
       }
    }
 
-   public class PlayerMakeMoveMessage(string word, string newChar, int charX, int charY)
+   public class PlayerMakeMoveMessage(string choosenWord, string newChar, int charX, int charY)
    {
       public static ClientMessageIds Id { get => ClientMessageIds.PlayerMakeMove; }
 
@@ -89,7 +89,7 @@ namespace BaldaGame.Repository.Client
       public int CharX { get; set; } = charX;
       public int CharY { get; set; } = charY;
 
-      public string ChoosenWord { get; set; } = word;
+      public string ChoosenWord { get; set; } = choosenWord;
 
       public static PlayerMakeMoveMessage? TryFromMessage(ClientMessage message)
       {

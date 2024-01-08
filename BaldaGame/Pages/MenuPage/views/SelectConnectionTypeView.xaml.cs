@@ -26,7 +26,15 @@ namespace BaldaGame.Pages.MenuPage.views
 
       private void CreateLobbyButtonClick(object sender, RoutedEventArgs e)
       {
-         //TODO: Сделать переключение игры на режим сервера, запустить сервер
+         App.Instance.GameController.IsServer = true;
+
+         var controller = MenuPageNavigationController.Instance;
+         controller.NavigateTo(MenuPages.CreateLobby);
+      }
+
+      private void ConnectToLobbyButtonClick(object sender, RoutedEventArgs e)
+      {
+         App.Instance.GameController.IsServer = false;
 
          var controller = MenuPageNavigationController.Instance;
          controller.NavigateTo(MenuPages.CreateLobby);

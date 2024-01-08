@@ -23,6 +23,7 @@ namespace BaldaGame.Repository.Server
       private const int _udpSendPort = 8585;
       private const int _tcpPort = 8485;
       private const string _udpMessage = "Balda The game";
+      CancellationTokenSource? tcpConnectCancellationToken;
 
       public event ServerEventHandler? Notify;
 
@@ -43,10 +44,12 @@ namespace BaldaGame.Repository.Server
       {
          Debug.WriteLine("Server was stopped");
 
+         tcpConnectCancellationToken?.Cancel();
+
          _isServerEnabled = false;
          _isBroadcastEnabled = false;
 
-         client?.Close();
+         client?.Close(ignoreServer: true);
          client = null;
          listener?.Stop();
          listener = null;
@@ -54,7 +57,7 @@ namespace BaldaGame.Repository.Server
 
       public void NotifyListeners(ClientMessage message)
       {
-         Debug.WriteLine($"Сервер получил новое сообщение: {message.Id}");
+         Debug.WriteLine($"Сервер получил новое сообщение: {message.Id}, {message.Data}");
 
          switch (message.Id)
          {
@@ -162,29 +165,22 @@ namespace BaldaGame.Repository.Server
          if (listener == null)
             return;
 
-         using var cancellation = new CancellationTokenSource();
+         tcpConnectCancellationToken = new();
 
-         var acceptingTask = listener.AcceptTcpClientAsync(cancellation.Token);
-         while (_isServerEnabled && !acceptingTask.IsCompleted)
-         {
-            await Task.Delay(200);
-         }
-         if (_isServerEnabled)
-         {
-            client = new ClientObject(await acceptingTask, this);
-            _isBroadcastEnabled = false;
-            listener.Stop();
+         var acceptingTask = listener.AcceptTcpClientAsync(tcpConnectCancellationToken.Token);
 
-            var msg = new ClientMessage()
-            {
-               Id = ClientMessageIds.PlayerConnected
-            };
-            NotifyListeners(msg);
-         }
-         else
+         client = new ClientObject(await acceptingTask, this);
+         _isBroadcastEnabled = false;
+         listener.Stop();
+
+         var msg = new ClientMessage()
          {
-            cancellation.Cancel();
-         }
+            Id = ClientMessageIds.PlayerConnected
+         };
+         NotifyListeners(msg);
+
+         tcpConnectCancellationToken.Dispose();
+         tcpConnectCancellationToken = null;
       }
    }
 
@@ -206,14 +202,13 @@ namespace BaldaGame.Repository.Server
          Writer = new StreamWriter(stream);
          Reader = new StreamReader(stream);
 
-         //_ = ListenMessages();
-         new Thread(async () => await ListenMessages()).Start();
+         _ = ListenMessages();
       }
 
       public void SendMessage(ServerMessage message)
       {
          var encoded = message.Encode();
-         Writer.Write(encoded);
+         Writer.WriteLine(encoded);
          Writer.Flush();
       }
 
@@ -224,25 +219,35 @@ namespace BaldaGame.Repository.Server
             try
             {
                var encoded = await Reader.ReadLineAsync();
-               if (encoded == null) continue;
+               if (encoded == null) break;
                var message = ClientMessage.Decode(encoded);
                server.NotifyListeners(message);
             }
             catch
             {
-               var message = new ClientMessage()
-               {
-                  Id = ClientMessageIds.PlayerDisconnected
-               };
-               server.NotifyListeners(message);
+               SendDisconnectedMessage();
                break;
             }
          }
       }
 
-      public void Close()
+      public void Close(bool ignoreServer = false)
       {
+         SendDisconnectedMessage();
+         if (!ignoreServer)
+         {
+            server.Stop();
+         }
          client.Close();
+      }
+
+      void SendDisconnectedMessage()
+      {
+         var message = new ClientMessage()
+         {
+            Id = ClientMessageIds.PlayerDisconnected
+         };
+         server.NotifyListeners(message);
       }
 
       ~ClientObject()

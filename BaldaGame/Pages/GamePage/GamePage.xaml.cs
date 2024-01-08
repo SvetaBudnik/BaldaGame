@@ -12,11 +12,37 @@ namespace BaldaGame.Pages.GamePage
    /// </summary>
    public sealed partial class GamePage : Page
    {
-
+      GameController controller;
+      GameDataController gameDataController;
+      MainPlayerController mainPlayerController;
+      SecondPlayerController secondPlayerController;
 
       public GamePage()
       {
          InitializeComponent();
+         var app = App.Instance;
+         controller = app.GameController;
+         gameDataController = controller.DataController;
+
+         mainPlayerController = app.MainPlayerController;
+         secondPlayerController = app.SecondPlayerController;
+
+         controller.Init(MainGrid, this);
+      }
+
+      private void CancelGameButtonClick(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+      {
+         controller.FinalizeGame();
+      }
+
+      private void ReverseStepButton_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+      {
+         controller.CancelMove();
+      }
+
+      private void SkipStepButton_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+      {
+         controller.SkipMove();
       }
    }
 }

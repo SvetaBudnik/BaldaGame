@@ -90,7 +90,8 @@
                 Height="270"
                 Width="250"
                 HorizontalContentAlignment="Center"
-                VerticalContentAlignment="Stretch">
+                VerticalContentAlignment="Stretch"
+                Click="ConnectToLobbyButtonClick">
                 <Grid
                     VerticalAlignment="Stretch">
                     <Grid.RowDefinitions>
