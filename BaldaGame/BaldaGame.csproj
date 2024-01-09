@@ -23,6 +23,7 @@
     <HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="Assets\Square44x44Logo.scale-100.png" />
     <None Remove="Pages\GamePage\GamePage.xaml" />
     <None Remove="Pages\MenuPage\MenuPage.xaml" />
     <None Remove="Pages\MenuPage\MenuPageResources.xaml" />

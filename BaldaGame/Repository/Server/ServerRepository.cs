@@ -145,19 +145,39 @@ namespace BaldaGame.Repository.Server
       {
          var bytes = Encoding.UTF8.GetBytes(_udpMessage);
 
-         var udpClient = new UdpClient();
-         var endpoint = new IPEndPoint(IPAddress.Any, _tcpPort);
-         udpClient.Client.Bind(endpoint);
-
          _isBroadcastEnabled = true;
-         while (_isServerEnabled && _isBroadcastEnabled)
-         {
-            udpClient.Send(bytes, bytes.Length, "255.255.255.255", _udpSendPort);
-            await Task.Delay(1000);
-         }
+         foreach (var i in System.Net.NetworkInformation.NetworkInterface.GetAllNetworkInterfaces())
+            foreach (var ua in i.GetIPProperties().UnicastAddresses)
+            {
+               _ = Task.Run(async () =>
+               {
+                  var udpClient = new UdpClient();
+                  var endpoint = new IPEndPoint(ua.Address, _tcpPort);
+                  udpClient.Client.Bind(endpoint);
 
-         udpClient.Close();
-         _isBroadcastEnabled = true;
+                  while (_isServerEnabled && _isBroadcastEnabled)
+                  {
+                     Debug.WriteLine($"Broadcast: {endpoint.Address}:{endpoint.Port}");
+                     udpClient.Send(bytes, bytes.Length, "255.255.255.255", _udpSendPort);
+                     await Task.Delay(1000);
+                  }
+
+                  udpClient.Close();
+               });
+            }
+
+         //var udpClient = new UdpClient();
+         //var endpoint = new IPEndPoint(IPAddress.Any, _tcpPort);
+         //udpClient.Client.Bind(endpoint);
+
+         //_isBroadcastEnabled = true;
+         //while (_isServerEnabled && _isBroadcastEnabled)
+         //{
+         //   udpClient.Send(bytes, bytes.Length, "255.255.255.255", _udpSendPort);
+         //   await Task.Delay(1000);
+         //}
+
+         //udpClient.Close();
       }
 
       private async Task RunClientFinder()

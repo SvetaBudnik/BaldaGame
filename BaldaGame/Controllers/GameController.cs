@@ -166,8 +166,8 @@ namespace BaldaGame.Controllers
       public ClientRepository? clientRepository;
 
       public CreateLobbyView? CreateLobbyView { get; set; }
-      public Grid? GameFieldGrid { get; set; }
       public GamePage? GamePage { get; set; }
+      public Grid? GameFieldGrid { get; set; }
 
       public bool IsServer { get; set; } = false;
 

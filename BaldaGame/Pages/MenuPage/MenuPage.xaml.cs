@@ -29,8 +29,6 @@ namespace BaldaGame.Pages.MenuPage
       {
          base.OnNavigatedTo(e);
 
-         Debug.WriteLine("I'm here!");
-
          MenuPageFrame.BackStack.Clear();
 
          var controller = MenuPageNavigationController.Instance;

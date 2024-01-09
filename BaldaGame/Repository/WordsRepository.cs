@@ -7,7 +7,7 @@ namespace BaldaGame.Repository
    {
       public static WordsRepository Instance { get; } = new();
 
-      List<string> words;
+      readonly List<string> words;
 
       WordsRepository()
       {
@@ -19,7 +19,16 @@ namespace BaldaGame.Repository
             "ОЛОВО",
             "МЕТРО",
             "ЧАШКА",
-            "СЛОВО"
+            "СЛОВО",
+            "КОШКА",
+            "ГРУША",
+            "ВИЛКА",
+            "КОМАР",
+            "ДЯТЕЛ",
+            "КОВЕР",
+            "ВОБЛА",
+            "РАМПА",
+            "ИЗГОЙ"
          ];
       }
 
