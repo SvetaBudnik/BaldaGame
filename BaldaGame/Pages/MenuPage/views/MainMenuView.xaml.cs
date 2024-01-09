@@ -45,5 +45,11 @@ namespace BaldaGame.Pages.MenuPage.views
          var controller = MenuPageNavigationController.Instance;
          controller.NavigateTo(MenuPages.RegisterPerson);
       }
+
+      private void AboutGameButtonClick(object sender, RoutedEventArgs e)
+      {
+         var controller = MenuPageNavigationController.Instance;
+         controller.NavigateTo(MenuPages.AboutPage);
+      }
    }
 }

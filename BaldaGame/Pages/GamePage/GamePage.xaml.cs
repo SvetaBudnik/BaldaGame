@@ -1,6 +1,7 @@
 using BaldaGame.Controllers;
 
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Navigation;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -30,9 +31,9 @@ namespace BaldaGame.Pages.GamePage
          controller.Init(MainGrid, this);
       }
 
-      private void CancelGameButtonClick(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+      private async void CancelGameButtonClick(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
       {
-         controller.FinalizeGame();
+         await controller.FinalizeGame();
       }
 
       private void ReverseStepButton_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)

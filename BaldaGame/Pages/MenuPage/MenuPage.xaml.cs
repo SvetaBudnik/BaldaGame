@@ -3,6 +3,7 @@ using BaldaGame.Pages.MenuPage.Controller;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
 
+using System;
 using System.Diagnostics;
 
 // To learn more about WinUI, the WinUI project structure,
@@ -33,6 +34,7 @@ namespace BaldaGame.Pages.MenuPage
          MenuPageFrame.BackStack.Clear();
 
          var controller = MenuPageNavigationController.Instance;
+         controller.Init(MenuPageFrame);
          controller.NavigateTo(MenuPages.MainMenu);
       }
 

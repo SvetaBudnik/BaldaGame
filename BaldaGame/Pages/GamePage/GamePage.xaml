@@ -68,7 +68,7 @@
                         Height="*" />
                 </Grid.RowDefinitions>
                 <TextBlock
-                    Text="Найденные слова:"
+                    Text="Составленные слова:"
                     FontSize="20"
                     HorizontalAlignment="Center"
                     Margin="0 0 0 10" />
@@ -264,7 +264,7 @@
                         Height="*" />
                 </Grid.RowDefinitions>
                 <TextBlock
-                    Text="Найденные слова:"
+                    Text="Составленные слова:"
                     FontSize="20"
                     HorizontalAlignment="Center"
                     Margin="0 0 0 10" />

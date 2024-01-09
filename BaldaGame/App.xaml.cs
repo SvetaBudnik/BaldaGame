@@ -35,6 +35,8 @@ namespace BaldaGame
          IconsRepository = new();
          IconsRepository.LoadRepository();
          MainPlayerController = new(IconsRepository);
+         SecondPlayerController = new(IconsRepository);
+         GameController = new();
       }
 
       /// <summary>
@@ -46,13 +48,16 @@ namespace BaldaGame
          m_window = new Window();
          m_frame = new Frame();
          m_window.Content = m_frame;
+         m_window.Title = "Балда!";
          m_window.Activate();
-         //m_frame.Navigate(typeof(MenuPage));
-         m_frame.Navigate(typeof(GamePage));
+         m_frame.Navigate(typeof(MenuPage));
+         //m_frame.Navigate(typeof(GamePage));
       }
 
       public IconsRepository IconsRepository { get; private set; }
       public MainPlayerController MainPlayerController { get; private set; }
+      public SecondPlayerController SecondPlayerController { get; private set; }
+      public GameController GameController { get; private set; }
 
       public Frame? RootFrame { get => m_frame; }
       private Frame? m_frame;

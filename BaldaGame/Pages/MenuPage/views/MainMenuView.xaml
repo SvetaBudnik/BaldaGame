@@ -44,13 +44,12 @@
                 Grid.Row="0"
                 Content="Начать игру"
                 Style="{StaticResource MenuButtonStyle}"
-                Click="StartGameClick"/>
-            <!--TODO: Сделать меню "Об игре"-->
+                Click="StartGameClick" />
             <Button
                 Grid.Row="1"
                 Content="Об игре"
                 Style="{StaticResource MenuButtonStyle}"
-                IsEnabled="False"/>
+                Click="AboutGameButtonClick"/>
             <Button
                 Grid.Row="2"
                 Content="Выйти из игры"

@@ -22,10 +22,7 @@ namespace BaldaGame.Pages.MenuPage.Controller
 
       public void Init(Frame navFrame)
       {
-         if (_navFrame == null)
-         {
             _navFrame = navFrame;
-         }
       }
 
       public bool NavigateBack()
@@ -61,6 +58,10 @@ namespace BaldaGame.Pages.MenuPage.Controller
 
             case MenuPages.CreateLobby:
                NavigateToType(typeof(CreateLobbyView));
+               break;
+
+            case MenuPages.AboutPage:
+               NavigateToType(typeof(AboutGameView));
                break;
 
 

@@ -19,20 +19,20 @@ namespace BaldaGame.Repository
       public IconsRepository()
       {
          IconPaths = [
-            "/Assets/Icons/Players/art-woolf.jpg",
-            "/Assets/Icons/Players/art-sloth.jpg",
-            "/Assets/Icons/Players/art-woolf.jpg",
-            "/Assets/Icons/Players/art-sloth.jpg",
-            "/Assets/Icons/Players/art-woolf.jpg",
-            "/Assets/Icons/Players/art-sloth.jpg"
+            "/Assets/Icons/Players/cat.png",
+            "/Assets/Icons/Players/dog.png",
+            "/Assets/Icons/Players/hamster.png",
+            "/Assets/Icons/Players/lion.png",
+            "/Assets/Icons/Players/luntic.png",
+            "/Assets/Icons/Players/sloth.jpg"
          ];
          IconTags = [
-            "art-woolf",
-            "art-sloth",
-            "art-woolf1",
-            "art-sloth1",
-            "art-woolf2",
-            "art-sloth2"
+            "cat",
+            "dog",
+            "hamster",
+            "lion",
+            "luntic",
+            "sloth"
          ];
       }
 

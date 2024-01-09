@@ -12,11 +12,21 @@
     <EnableMsixTooling>true</EnableMsixTooling>
     <Nullable>enable</Nullable>
     <DefaultLanguage>ru-RU</DefaultLanguage>
+    <GenerateAppInstallerFile>False</GenerateAppInstallerFile>
+    <AppxPackageSigningEnabled>True</AppxPackageSigningEnabled>
+    <PackageCertificateThumbprint>1DCC7D72DF29F39B55227AC8DCDAE69933A8F0C9</PackageCertificateThumbprint>
+    <AppxPackageSigningTimestampDigestAlgorithm>SHA256</AppxPackageSigningTimestampDigestAlgorithm>
+    <AppxAutoIncrementPackageRevision>True</AppxAutoIncrementPackageRevision>
+    <AppxSymbolPackageEnabled>False</AppxSymbolPackageEnabled>
+    <GenerateTestArtifacts>True</GenerateTestArtifacts>
+    <AppxBundle>Never</AppxBundle>
+    <HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Pages\GamePage\GamePage.xaml" />
     <None Remove="Pages\MenuPage\MenuPage.xaml" />
     <None Remove="Pages\MenuPage\MenuPageResources.xaml" />
+    <None Remove="Pages\MenuPage\views\AboutGameView.xaml" />
     <None Remove="Pages\MenuPage\views\CreateLobbyView.xaml" />
     <None Remove="Pages\MenuPage\views\MainMenuView.xaml" />
     <None Remove="Pages\MenuPage\views\RegisterPersonView.xaml" />
@@ -69,6 +79,11 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Pages\MenuPage\views\AboutGameView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Page Update="Pages\MenuPage\views\CreateLobbyView.xaml">

@@ -89,6 +89,18 @@ namespace BaldaGame.Controllers
       public ObservableCollection<string> MainPlayerWords => mainPlayerWords;
       public ObservableCollection<string> SecondPlayerWords => secondPlayerWords;
 
+      public void Clear()
+      {
+         DisableTimer();
+         currentPerson = Person.Empty;
+         currentPersonName = "";
+         isCurrentStepByPlayer = false;
+         mainPlayerWords = [];
+         secondPlayerWords = [];
+         timerValue = 0;
+         isTimerEnabled = false;
+      }
+
       public void AddMainPlayerWord(string word)
       {
          mainPlayerWords.Add(word);
@@ -193,6 +205,12 @@ namespace BaldaGame.Controllers
             DataController.CurrentPerson = App.Instance.MainPlayerController.Person;
             DataController.IsCurrentStepByPlayer = true;
             mainWord = WordsRepository.Instance.GetRandomWord();
+
+            if (GamePage?.IsLoaded == true)
+            {
+               GamePage!.SkipStepButton.IsEnabled = true;
+            }
+
             serverRepository.Run();
          }
          else
@@ -200,6 +218,10 @@ namespace BaldaGame.Controllers
             clientRepository = new ClientRepository();
             clientRepository.Notify += OnClientEvent;
             clientRepository.TryConnectToServer();
+         }
+         if (GameFieldGrid?.IsLoaded == true)
+         {
+            GridInit();
          }
       }
 
@@ -306,18 +328,28 @@ namespace BaldaGame.Controllers
             await dialog.ShowAsync();
          }
 
-         Elems = [];
          Selected = [];
-         GameFieldGrid?.Children.Clear();
+         selectedWord = "";
+         ChangedCell = null;
+         IsPointerPressed = false;
+
+         foreach (var cell in Elems)
+         {
+            cell.Content = "";
+            cell.TryUnselect();
+            cell.UnselectBorder();
+         }
 
          DataController.TimerRunedOutEvent -= SkipMove;
+         DataController.Clear();
 
          App.Instance.RootFrame!.Navigate(typeof(MenuPage));
+         isGameStopped = false;
       }
 
       bool IsFieldIsFullfilled()
       {
-         foreach(var el in Elems)
+         foreach (var el in Elems)
          {
             if (el.Content == "") return false;
          }
@@ -353,7 +385,13 @@ namespace BaldaGame.Controllers
 
       void OnGameGridLoaded(object sender, RoutedEventArgs e)
       {
-         var word = mainWord;
+         GridInit();
+      }
+
+      void GridInit()
+      {
+         GameFieldGrid?.Children.Clear();
+         Elems.Clear();
 
          for (int i = 0; i < 5; i++)
          {
@@ -577,10 +615,153 @@ namespace BaldaGame.Controllers
          Debug.WriteLine($"Client in game: Получено событие {clientEvent}");
          switch (clientEvent)
          {
+            case ClientPlayerConnected se: OnClientPlayerConnected(se); break;
+            case ClientGotPlayerInfo se: OnClientGotPlayerInfo(se); break;
+            case ClientPlayerMakeMove se: OnClientPlayerMakeMove(se); break;
+            case ClientPlayerAgreedWithWord se: OnClientPlayerAgreedWithWord(se); break;
+            case ClientPlayerDisagreedWithWord se: OnClientPlayerDisagreedWithWord(se); break;
+            case ClientPlayerSkipMove se: OnClientPlayerSkipMove(se); break;
+            case ClientPlayerDisconnected se: OnClientPlayerDisconnected(se); break;
+            case ClientPlayerCancelledGame se: OnClientPlayerCancelledGame(se); break;
+            case ClientServerChoosedMainWord se: OnClientServerChoosedMainWord(se); break;
 
             default: throw new NotImplementedException();
          }
       }
+
+      void OnClientPlayerConnected(ClientPlayerConnected info)
+      {
+         var player = App.Instance.MainPlayerController;
+
+         var msg = new Repository.Client.PlayerInfoMessage(player.PersonName, player.PersonIcon.Tag);
+         clientRepository?.SendMessage(msg.GetClientMessage());
+      }
+
+      void OnClientGotPlayerInfo(ClientGotPlayerInfo info)
+      {
+         var iconsRepository = App.Instance.IconsRepository;
+         var icon = iconsRepository.TryFindIcon(info.IconTag);
+         if (icon is null)
+         {
+            Debug.WriteLine($"OnServerGotPlayerInfo: Не получилось найти иконку {info.IconTag}");
+            icon = iconsRepository.DefaultIcon;
+         }
+
+         var secondPlayerController = App.Instance.SecondPlayerController;
+         secondPlayerController.PersonIcon = icon;
+         secondPlayerController.PersonName = info.Username;
+
+         DataController.CurrentPerson = secondPlayerController.Person;
+
+         CreateLobbyView?.AnimateTransitWhenConnect();
+         DataController.ResetTimer();
+         DataController.EnableTimer();
+      }
+
+      async void OnClientPlayerMakeMove(ClientPlayerMakeMove info)
+      {
+         DataController.DisableTimer();
+
+         var dialog = UserInputContentDialog.GetAnotherWordPrompt(GamePage!.XamlRoot, info.ChoosenWord);
+         var result = await dialog.ShowAsync();
+         if (result == ContentDialogResult.Primary)
+         {
+            var cell = Elems[info.CharX * 5 + info.CharY];
+            cell.Content = info.NewChar;
+            DataController.AddSecondPlayerWord(info.ChoosenWord);
+            var msg = new ClientMessage()
+            {
+               Id = ClientMessageIds.PlayerAgreedWithWord
+            };
+            clientRepository?.SendMessage(msg);
+
+            if (IsFieldIsFullfilled())
+            {
+               var gameEndMsg = new ClientMessage()
+               {
+                  Id = ClientMessageIds.PlayerCancelledGame
+               };
+               clientRepository?.SendMessage(gameEndMsg);
+            }
+
+            DataController.CurrentPerson = App.Instance.MainPlayerController.Person;
+            DataController.IsCurrentStepByPlayer = true;
+            GamePage.TextBlockAwaitNewCell.Visibility = Visibility.Visible;
+            GamePage.SkipStepButton.IsEnabled = true;
+
+            DataController.ResetTimer();
+         }
+         else
+         {
+            var msg = new ClientMessage()
+            {
+               Id = ClientMessageIds.PlayerDisagreedWithWord
+            };
+            clientRepository?.SendMessage(msg);
+         }
+
+         DataController.EnableTimer();
+      }
+
+      void OnClientPlayerSkipMove(ClientPlayerSkipMove info)
+      {
+         DataController.ResetTimer();
+         DataController.IsCurrentStepByPlayer = true;
+         DataController.CurrentPerson = App.Instance.MainPlayerController.Person;
+         CancelMove();
+         GamePage!.SkipStepButton.IsEnabled = true;
+         DataController.ResetTimer();
+         DataController.EnableTimer();
+      }
+
+      void OnClientPlayerDisconnected(ClientPlayerDisconnected info)
+      {
+         FinalizeGame(fromUser: false);
+      }
+
+      void OnClientPlayerCancelledGame(ClientPlayerCancelledGame info)
+      {
+         FinalizeGame(fromUser: false);
+      }
+
+      void OnClientPlayerAgreedWithWord(ClientPlayerAgreedWithWord info)
+      {
+         DataController.IsCurrentStepByPlayer = false;
+         DataController.CurrentPerson = App.Instance.SecondPlayerController.Person;
+         DataController.AddMainPlayerWord(selectedWord);
+         GamePage!.TextBlockAwaitingForConfirm.Visibility = Visibility.Collapsed;
+
+         if (ChangedCell is not null)
+         {
+            ChangedCell.UnselectBorder();
+            ChangedCell = null;
+         }
+         selectedWord = "";
+
+         GamePage!.ReverseStepButton.IsEnabled = false;
+         GamePage!.SkipStepButton.IsEnabled = false;
+         DataController.ResetTimer();
+         DataController.EnableTimer();
+      }
+
+      async void OnClientPlayerDisagreedWithWord(ClientPlayerDisagreedWithWord info)
+      {
+         GamePage!.TextBlockAwaitingForConfirm.Visibility = Visibility.Collapsed;
+
+         CancelMove();
+         GamePage.SkipStepButton.IsEnabled = true;
+         DataController.EnableTimer();
+
+         var dialog = UserInputContentDialog.GetDeniedWordPrompt(GamePage.XamlRoot);
+
+         await dialog.ShowAsync();
+      }
+
+      void OnClientServerChoosedMainWord(ClientServerChoosedMainWord info)
+      {
+         mainWord = info.Word;
+      }
+
 
 
       private void OnServerEvent(IServerEvent serverEvent)

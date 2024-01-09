@@ -10,7 +10,7 @@
   <Identity
     Name="8a5a640c-1395-4246-a84d-589495644fe5"
     Publisher="CN=Semaf"
-    Version="1.0.0.0" />
+    Version="0.1.0.0" />
 
   <mp:PhoneIdentity PhoneProductId="8a5a640c-1395-4246-a84d-589495644fe5" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
